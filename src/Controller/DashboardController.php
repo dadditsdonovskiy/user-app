@@ -15,4 +15,11 @@ class DashboardController extends AbstractController
             'controller_name' => 'DashboardController',
         ]);
     }
+    #[Route('/customer-dashboard', name: 'app_customer_dashboard')]
+    public function indexForCustomer(): Response
+    {
+        return $this->render('dashboard/customer-index.html.twig', [
+            'controller_name' => 'CustomerDashboardController',
+        ]);
+    }
 }
