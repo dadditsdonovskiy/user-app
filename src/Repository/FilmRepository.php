@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\Film\CreateFilmDto;
 use App\Entity\Film;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -19,6 +20,18 @@ class FilmRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Film::class);
+    }
+
+    public function createFilm(CreateFilmDto $dto): Film
+    {
+        $film = new Film();
+        $film->setTitle($dto->getTitle());
+        $film->setDescription($dto->getDescription());
+        $film->setReleasedAt(date_create_immutable($dto->getReleasedAt()));
+
+        $this->save($film, true);
+
+        return $film;
     }
 
     public function save(Film $entity, bool $flush = false): void
