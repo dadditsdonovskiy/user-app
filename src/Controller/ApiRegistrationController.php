@@ -2,35 +2,33 @@
 
 namespace App\Controller;
 
+use App\DTO\User\CreateUserDto;
+use App\Repository\UserRepository;
+use App\Service\Serializer\DTOSerializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Doctrine\Persistence\ManagerRegistry;
-use App\Entity\User;
 
 class ApiRegistrationController extends AbstractController
 {
-    #[Route('/api/register', name: 'app_api_registration', methods: 'POST')]
-    public function index(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher): Response
+    public function __construct(private UserRepository $userRepository)
     {
-        $em = $doctrine->getManager();
-        $decoded = json_decode($request->getContent());
-        $email = $decoded->email;
-        $plaintextPassword = $decoded->password;
+    }
 
-        $user = new User();
-        $hashedPassword = $passwordHasher->hashPassword(
-            $user,
-            $plaintextPassword
-        );
-        $user->setPassword($hashedPassword);
-        $user->setEmail($email);
-        $user->setUsername($email);
-        $em->persist($user);
-        $em->flush();
-
-        return $this->json(['message' => 'Registered Successfully']);
+    #[Route('/api/register', name: 'app_api_registration', methods: 'POST')]
+    public function register(Request $request, DTOSerializer $serializer): JsonResponse
+    {
+        $createUserDto = $serializer->deserialize($request->getContent(), CreateUserDto::class, 'json');
+        $user = $this->userRepository->createUser($createUserDto);
+        return $this->json([
+            'message' => 'User successfully created',
+            'user' => [
+                'username' => $user->getUsername(),
+                'role' => $user->getRoles()
+            ],
+            'statusCode' => Response::HTTP_CREATED
+        ]);
     }
 }
