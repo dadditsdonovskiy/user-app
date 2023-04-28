@@ -26,7 +26,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         parent::__construct($registry, User::class);
     }
 
-    public function createUser(CreateUserDto $dto)
+    public function createUser(CreateUserDto $dto): User
     {
         $plainPassword = $dto->getPassword();
 
@@ -45,6 +45,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function save(User $entity, bool $flush = false): void
     {
+        //dd($entity);
         $this->getEntityManager()->persist($entity);
 
         if ($flush) {
