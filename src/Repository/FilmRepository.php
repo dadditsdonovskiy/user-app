@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\Film\CreateFilmDto;
 use App\Entity\Film;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,6 +22,18 @@ class FilmRepository extends ServiceEntityRepository
         parent::__construct($registry, Film::class);
     }
 
+    public function createFilm(CreateFilmDto $dto): Film
+    {
+        $film = new Film();
+        $film->setTitle($dto->getTitle());
+        $film->setDescription($dto->getDescription());
+        $film->setReleasedAt(date_create_immutable($dto->getReleasedAt()));
+
+        $this->save($film, true);
+
+        return $film;
+    }
+
     public function save(Film $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -28,6 +41,13 @@ class FilmRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function deleteFilmById(int $id): bool
+    {
+        $film = $this->findOneBy(['id' => $id]);
+        $this->remove($film, true);
+        return true;
     }
 
     public function remove(Film $entity, bool $flush = false): void
