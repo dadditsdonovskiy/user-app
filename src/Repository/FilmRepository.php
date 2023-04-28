@@ -43,6 +43,13 @@ class FilmRepository extends ServiceEntityRepository
         }
     }
 
+    public function deleteFilmById(int $id): bool
+    {
+        $film = $this->findOneBy(['id' => $id]);
+        $this->remove($film, true);
+        return true;
+    }
+
     public function remove(Film $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);

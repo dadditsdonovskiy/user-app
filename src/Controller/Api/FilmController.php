@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class FilmController extends AbstractController
@@ -29,8 +30,18 @@ class FilmController extends AbstractController
         ]);
     }
 
+    #[Route('/api/films/{id}/delete', name: 'film-remove', methods: 'DELETE')]
+    public function delete(int $id): JsonResponse
+    {
+        if ($this->filmRepository->deleteFilmById($id)) {
+            return new JsonResponse(['status' => 'Film deleted'], Response::HTTP_OK);
+        }
+
+        throw new NotFoundHttpException('film not found');
+    }
+
     #[Route('/films', name: 'film-list', methods: 'GET')]
-    public function index()
+    public function index(): JsonResponse
     {
         $films = $this->filmRepository->findAll();
         return $this->json($films);
